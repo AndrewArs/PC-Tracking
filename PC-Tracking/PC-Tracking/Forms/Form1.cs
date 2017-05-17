@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using System.Collections;
 using System.Reflection;
 using System.IO;
 
@@ -16,7 +9,7 @@ namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
-        string logPath = "log.txt";
+        string logPath = "C:\\Users\\Andrew\\Documents\\log.txt";
         string powerLineStatus;
         string batteryChargeStatus;
 
@@ -25,8 +18,10 @@ namespace PC_Tracking
             InitializeComponent();
 
             this.Resize += Form1_Resize;
-            this.FormClosing += Form1_FormClosing;
+            this.FormClosed += Form1_FormClosed;
             this.Load += Form1_Load;
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+            listBox1.SelectedIndexChanged += new EventHandler(listBox1_SelectedIndexChanged);
 
             Type t = typeof(System.Windows.Forms.PowerStatus);
             PropertyInfo[] pi = t.GetProperties();
@@ -41,26 +36,22 @@ namespace PC_Tracking
                 listBox1.Items.Add(pi[i].Name);
             textBox1.Text = "The PowerStatus class has " + pi.Length.ToString() + " properties.\r\n";
 
-            // Configure the list item selected handler for the list box to invoke a 
-            // method that displays the value of each property.           
-            listBox1.SelectedIndexChanged += new EventHandler(listBox1_SelectedIndexChanged);
-
-
-            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
             StringBuilder result = new StringBuilder();
             result.Append(DateTime.Now).Append("  ---  ").Append("Program started").AppendLine();
             File.AppendAllText(logPath, result.ToString());
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             StringBuilder result = new StringBuilder();
             result.Append(DateTime.Now).Append("  ---  ").Append("Program closed").AppendLine();
             File.AppendAllText(logPath, result.ToString());
+
+            Application.ExitThread();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -132,6 +123,17 @@ namespace PC_Tracking
         {
             Show();
             WindowState = FormWindowState.Normal;
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm sf = new SettingsForm();
+            sf.ShowDialog();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form1_FormClosed(null, null);
         }
     }
 }
