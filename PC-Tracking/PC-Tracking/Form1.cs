@@ -17,12 +17,26 @@ namespace PC_Tracking
     public partial class Form1 : Form
     {
         string logPath = "log.txt";
+        string powerLineStatus;
+        string batteryChargeStatus;
+
         public Form1()
         {
             InitializeComponent();
 
+            this.Resize += Form1_Resize;
+            this.FormClosing += Form1_FormClosing;
+            this.Load += Form1_Load;
+
             Type t = typeof(System.Windows.Forms.PowerStatus);
             PropertyInfo[] pi = t.GetProperties();
+
+            powerLineStatus = t.GetProperty("PowerLineStatus").GetValue(SystemInformation.PowerStatus, null)
+                .ToString();
+
+            batteryChargeStatus = t.GetProperty("BatteryChargeStatus").GetValue(SystemInformation.PowerStatus, null)
+                .ToString();
+
             for (int i = 0; i < pi.Length; i++)
                 listBox1.Items.Add(pi[i].Name);
             textBox1.Text = "The PowerStatus class has " + pi.Length.ToString() + " properties.\r\n";
@@ -33,7 +47,26 @@ namespace PC_Tracking
 
 
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+        }
 
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            StringBuilder result = new StringBuilder();
+            result.Append(DateTime.Now).Append("  ---  ").Append("Program started").AppendLine();
+            File.AppendAllText(logPath, result.ToString());
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            StringBuilder result = new StringBuilder();
+            result.Append(DateTime.Now).Append("  ---  ").Append("Program closed").AppendLine();
+            File.AppendAllText(logPath, result.ToString());
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+                Hide();
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -63,15 +96,42 @@ namespace PC_Tracking
             StringBuilder result = new StringBuilder();
             result.Append(DateTime.Now.ToString());
             result.Append("  ---  ");
-            result.Append(e.Mode.ToString());
+
+            if(e.Mode == PowerModes.StatusChange)
+            {
+                Type t = typeof(System.Windows.Forms.PowerStatus);
+
+                string pls = t.GetProperty("PowerLineStatus").GetValue(SystemInformation.PowerStatus, null)
+                .ToString();
+
+                string bcs = t.GetProperty("BatteryChargeStatus").GetValue(SystemInformation.PowerStatus, null)
+                .ToString();
+
+                if (!pls.Equals(powerLineStatus))
+                {
+                    if (pls == "Online")
+                        result.Append("Power line plugged");
+                    else result.Append("Power line unplugged");
+
+                    powerLineStatus = pls;
+                }
+                else if (!bcs.Equals(batteryChargeStatus))
+                {
+                    result.Append("Battery changes: ").Append(bcs);
+                    batteryChargeStatus = bcs;
+                }
+            }
+            else result.Append(e.Mode.ToString());
+
             result.AppendLine();
 
             File.AppendAllText(logPath, result.ToString());
         }
 
-        private void listBox1_SelectedIndexChanged_1(object sender, EventArgs e)
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-
+            Show();
+            WindowState = FormWindowState.Normal;
         }
     }
 }
