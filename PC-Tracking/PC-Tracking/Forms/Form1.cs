@@ -4,18 +4,23 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Reflection;
 using System.IO;
+using System.Data;
+using System.Data.Common;
+using System.Data.SQLite;
 
 namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
-        string logPath = "C:\\Users\\Andrew\\Documents\\log.txt";
+        string logPath = Application.StartupPath + "\\log.txt";
         string powerLineStatus;
         string batteryChargeStatus;
+        SQLiteConnection SQLite;
 
         public Form1()
         {
             InitializeComponent();
+            connectToDB();
 
             this.Resize += Form1_Resize;
             this.FormClosed += Form1_FormClosed;
@@ -39,6 +44,8 @@ namespace PC_Tracking
             StringBuilder result = new StringBuilder();
             result.Append(DateTime.Now).Append("  ---  ").Append("Program started").AppendLine();
             File.AppendAllText(logPath, result.ToString());
+
+            WriteToLog("Program started");
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -47,11 +54,36 @@ namespace PC_Tracking
             result.Append(DateTime.Now).Append("  ---  ").Append("Program closed").AppendLine();
             File.AppendAllText(logPath, result.ToString());
 
+            WriteToLog("Program closed");
+            SQLite.Close();
+
             Application.ExitThread();
+        }
+
+        private void connectToDB()
+        {
+            SQLite = new SQLiteConnection(String.Format("Data Source={0};", Application.StartupPath + "\\LogDB.db"));
+            SQLite.Open();
+        }
+
+        private void WriteToLog (string _operation)
+        {
+            string query = "INSERT INTO Log(Date, Operation) VALUES(@date, @operation)";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+            {
+                cmd.Parameters.Add("@date", DbType.String);
+                cmd.Parameters.Add("@operation", DbType.String);
+
+                cmd.Parameters["@date"].Value = DateTime.Now.ToString();
+                cmd.Parameters["@operation"].Value = _operation;
+                cmd.ExecuteNonQuery();
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -101,14 +133,22 @@ namespace PC_Tracking
                 if (!pls.Equals(powerLineStatus))
                 {
                     if (pls == "Online")
+                    {
                         result.Append("Power line plugged");
-                    else result.Append("Power line unplugged");
+                        WriteToLog("Power line plugged");
+                    }
+                    else
+                    {
+                        result.Append("Power line unplugged");
+                        WriteToLog("Power line unplugged");
+                    }
 
                     powerLineStatus = pls;
                 }
                 else if (!bcs.Equals(batteryChargeStatus))
                 {
                     result.Append("Battery changes: ").Append(bcs);
+                    WriteToLog(bcs);
                     batteryChargeStatus = bcs;
                 }
             }
