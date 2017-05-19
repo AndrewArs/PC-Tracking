@@ -5,17 +5,18 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.IO;
 using System.Data;
-using System.Data.Common;
 using System.Data.SQLite;
+using System.Net;
+using System.Collections.Specialized;
 
 namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
-        string logPath = Application.StartupPath + "\\log.txt";
         string powerLineStatus;
         string batteryChargeStatus;
         SQLiteConnection SQLite;
+        string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
 
         public Form1()
         {
@@ -41,19 +42,11 @@ namespace PC_Tracking
                 listBox1.Items.Add(pi[i].Name);
             textBox1.Text = "The PowerStatus class has " + pi.Length.ToString() + " properties.\r\n";
 
-            StringBuilder result = new StringBuilder();
-            result.Append(DateTime.Now).Append("  ---  ").Append("Program started").AppendLine();
-            File.AppendAllText(logPath, result.ToString());
-
             WriteToLog("Program started");
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            StringBuilder result = new StringBuilder();
-            result.Append(DateTime.Now).Append("  ---  ").Append("Program closed").AppendLine();
-            File.AppendAllText(logPath, result.ToString());
-
             WriteToLog("Program closed");
             SQLite.Close();
 
@@ -62,7 +55,8 @@ namespace PC_Tracking
 
         private void connectToDB()
         {
-            SQLite = new SQLiteConnection(String.Format("Data Source={0};", Application.StartupPath + "\\LogDB.db"));
+            SQLite = new SQLiteConnection(
+                String.Format("Data Source={0};Password=qwerty", Application.StartupPath + "\\LogDB.db"));
             SQLite.Open();
         }
 
@@ -79,6 +73,18 @@ namespace PC_Tracking
                 cmd.Parameters["@operation"].Value = _operation;
                 cmd.ExecuteNonQuery();
             }
+
+            using (WebClient client = new WebClient())
+            {
+                NameValueCollection postData = new NameValueCollection()
+                {
+                    { "date", DateTime.Now.ToString() },
+                    { "operation", _operation }
+                };
+
+                client.UploadValues(urlAddress, postData);
+            }
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -134,12 +140,10 @@ namespace PC_Tracking
                 {
                     if (pls == "Online")
                     {
-                        result.Append("Power line plugged");
                         WriteToLog("Power line plugged");
                     }
                     else
                     {
-                        result.Append("Power line unplugged");
                         WriteToLog("Power line unplugged");
                     }
 
@@ -147,16 +151,11 @@ namespace PC_Tracking
                 }
                 else if (!bcs.Equals(batteryChargeStatus))
                 {
-                    result.Append("Battery changes: ").Append(bcs);
                     WriteToLog(bcs);
                     batteryChargeStatus = bcs;
                 }
             }
-            else result.Append(e.Mode.ToString());
-
-            result.AppendLine();
-
-            File.AppendAllText(logPath, result.ToString());
+            else WriteToLog(e.Mode.ToString());
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
