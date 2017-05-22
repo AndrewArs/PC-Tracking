@@ -1,31 +1,25 @@
 ﻿using System;
-using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Reflection;
-using System.IO;
-using System.Data;
-using System.Data.SQLite;
-using System.Net;
-using System.Collections.Specialized;
 
 namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
+        Log log;
         string powerLineStatus;
         string batteryChargeStatus;
-        SQLiteConnection SQLite;
-        string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
+
+        int posX;
+        int posY;
+        bool drag = false;
 
         public Form1()
         {
             InitializeComponent();
-            connectToDB();
+            log = new Log(Application.StartupPath);
 
-            this.Resize += Form1_Resize;
-            this.FormClosed += Form1_FormClosed;
-            this.Load += Form1_Load;
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
             listBox1.SelectedIndexChanged += new EventHandler(listBox1_SelectedIndexChanged);
 
@@ -42,49 +36,14 @@ namespace PC_Tracking
                 listBox1.Items.Add(pi[i].Name);
             textBox1.Text = "The PowerStatus class has " + pi.Length.ToString() + " properties.\r\n";
 
-            WriteToLog("Program started");
+            log.WriteToLog("Program started");
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            WriteToLog("Program closed");
-            SQLite.Close();
+            log.WriteToLog("Program closed");
 
-            Application.ExitThread();
-        }
-
-        private void connectToDB()
-        {
-            SQLite = new SQLiteConnection(
-                String.Format("Data Source={0};Password=qwerty", Application.StartupPath + "\\LogDB.db"));
-            SQLite.Open();
-        }
-
-        private void WriteToLog (string _operation)
-        {
-            string query = "INSERT INTO Log(Date, Operation) VALUES(@date, @operation)";
-
-            using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
-            {
-                cmd.Parameters.Add("@date", DbType.String);
-                cmd.Parameters.Add("@operation", DbType.String);
-
-                cmd.Parameters["@date"].Value = DateTime.Now.ToString();
-                cmd.Parameters["@operation"].Value = _operation;
-                cmd.ExecuteNonQuery();
-            }
-
-            using (WebClient client = new WebClient())
-            {
-                NameValueCollection postData = new NameValueCollection()
-                {
-                    { "date", DateTime.Now.ToString() },
-                    { "operation", _operation }
-                };
-
-                client.UploadValues(urlAddress, postData);
-            }
-
+            Application.Exit();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -122,10 +81,6 @@ namespace PC_Tracking
 
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
-            StringBuilder result = new StringBuilder();
-            result.Append(DateTime.Now.ToString());
-            result.Append("  ---  ");
-
             if(e.Mode == PowerModes.StatusChange)
             {
                 Type t = typeof(System.Windows.Forms.PowerStatus);
@@ -140,28 +95,64 @@ namespace PC_Tracking
                 {
                     if (pls == "Online")
                     {
-                        WriteToLog("Power line plugged");
+                        log.WriteToLog("Power line plugged");
                     }
                     else
                     {
-                        WriteToLog("Power line unplugged");
+                        log.WriteToLog("Power line unplugged");
                     }
 
                     powerLineStatus = pls;
                 }
                 else if (!bcs.Equals(batteryChargeStatus))
                 {
-                    WriteToLog(bcs);
+                    log.WriteToLog(bcs);
                     batteryChargeStatus = bcs;
                 }
             }
-            else WriteToLog(e.Mode.ToString());
+            else log.WriteToLog(e.Mode.ToString());
         }
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             Show();
             WindowState = FormWindowState.Normal;
+        }
+
+        private void panel_MouseUp(object sender, MouseEventArgs e)
+        {
+            drag = false;
+        }
+
+        private void panel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (drag)
+            {
+                this.Top = System.Windows.Forms.Cursor.Position.Y - posY;
+                this.Left = System.Windows.Forms.Cursor.Position.X - posX;
+            }
+        }
+
+        private void panel_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                drag = true;
+                posX = Cursor.Position.X - this.Left;
+                posY = Cursor.Position.Y - this.Top;
+            }
+        }
+
+        private void buttonMinimize_Click(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+            Hide();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Program for tracking PC's state.\nCreated by Andrew Ars\n Kharkiv 2017",
+                "About", MessageBoxButtons.OK);
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
