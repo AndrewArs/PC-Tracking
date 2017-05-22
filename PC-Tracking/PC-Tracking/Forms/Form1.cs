@@ -43,7 +43,7 @@ namespace PC_Tracking
         {
             log.WriteToLog("Program closed");
 
-            Application.Exit();
+            Application.ExitThread();
         }
 
         private void Form1_Load(object sender, EventArgs e)

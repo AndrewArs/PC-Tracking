@@ -125,8 +125,8 @@
             // panel
             // 
             this.panel.BackColor = System.Drawing.SystemColors.Control;
-            this.panel.Controls.Add(this.buttonClose);
             this.panel.Controls.Add(this.buttonMinimize);
+            this.panel.Controls.Add(this.buttonClose);
             this.panel.Controls.Add(this.menuStrip1);
             this.panel.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel.Location = new System.Drawing.Point(0, 0);
@@ -165,7 +165,7 @@
             this.buttonMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonMinimize.Font = new System.Drawing.Font("Microsoft YaHei UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonMinimize.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonMinimize.Location = new System.Drawing.Point(642, 3);
+            this.buttonMinimize.Location = new System.Drawing.Point(647, 3);
             this.buttonMinimize.MouseClickColor1 = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(180)))), ((int)(((byte)(200)))));
             this.buttonMinimize.MouseHoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.buttonMinimize.Name = "buttonMinimize";
