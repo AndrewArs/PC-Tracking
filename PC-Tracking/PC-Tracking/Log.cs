@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Net;
+using System.Management;
 
 namespace PC_Tracking
 {
@@ -57,12 +57,27 @@ namespace PC_Tracking
 
         private void SendToWebClient (string _operation)
         {
+            string hwid = String.Empty;
+
+            ManagementClass mc = new ManagementClass("win32_Processor");
+            ManagementObjectCollection moc =  mc.GetInstances();
+
+            foreach(ManagementObject mo in moc)
+            {
+                if(String.IsNullOrEmpty(hwid))
+                {
+                    hwid = mo.GetPropertyValue("processorID").ToString();
+                    break;
+                }
+            }
+
             using (WebClient client = new WebClient())
             {
                 NameValueCollection postData = new NameValueCollection()
                 {
                     { "date", DateTime.Now.ToString() },
-                    { "operation", _operation }
+                    { "operation", _operation },
+                    { "hwid", hwid}
                 };
 
                 client.UploadValues(urlAddress, postData);

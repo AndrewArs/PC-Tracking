@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using System.Reflection;
-using System.Data;
+using System.Management;
 
 namespace PC_Tracking
 {
@@ -15,6 +14,7 @@ namespace PC_Tracking
         int posX;
         int posY;
         bool drag = false;
+        string hwid = String.Empty;
 
         BindingSource bs = new BindingSource();
 
@@ -23,9 +23,13 @@ namespace PC_Tracking
             InitializeComponent();
             log = new Log(Application.StartupPath);
 
+            GetHWID();
+
             //SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+
+            webBrowser.Url = new Uri("https://andriiarsienov.000webhostapp.com/?hwid=" + hwid);
 
             Type t = typeof(System.Windows.Forms.PowerStatus);
 
@@ -39,6 +43,21 @@ namespace PC_Tracking
             dataGridView.DataSource = bs;
 
             log.WriteToLog("Program started");
+        }
+
+        private void GetHWID()
+        {
+            ManagementClass mc = new ManagementClass("win32_Processor");
+            ManagementObjectCollection moc = mc.GetInstances();
+
+            foreach (ManagementObject mo in moc)
+            {
+                if (String.IsNullOrEmpty(hwid))
+                {
+                    hwid = mo.GetPropertyValue("processorID").ToString();
+                    break;
+                }
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
