@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Reflection;
+using System.Data;
 
 namespace PC_Tracking
 {
@@ -15,16 +16,18 @@ namespace PC_Tracking
         int posY;
         bool drag = false;
 
+        BindingSource bs = new BindingSource();
+
         public Form1()
         {
             InitializeComponent();
             log = new Log(Application.StartupPath);
 
+            //SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-            listBox1.SelectedIndexChanged += new EventHandler(listBox1_SelectedIndexChanged);
 
             Type t = typeof(System.Windows.Forms.PowerStatus);
-            PropertyInfo[] pi = t.GetProperties();
 
             powerLineStatus = t.GetProperty("PowerLineStatus").GetValue(SystemInformation.PowerStatus, null)
                 .ToString();
@@ -32,9 +35,8 @@ namespace PC_Tracking
             batteryChargeStatus = t.GetProperty("BatteryChargeStatus").GetValue(SystemInformation.PowerStatus, null)
                 .ToString();
 
-            for (int i = 0; i < pi.Length; i++)
-                listBox1.Items.Add(pi[i].Name);
-            textBox1.Text = "The PowerStatus class has " + pi.Length.ToString() + " properties.\r\n";
+            bs.DataSource = log.dataTable;
+            dataGridView.DataSource = bs;
 
             log.WriteToLog("Program started");
         }
@@ -55,28 +57,6 @@ namespace PC_Tracking
         {
             if (WindowState == FormWindowState.Minimized)
                 Hide();
-        }
-
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // Return if no item is selected.
-            if (listBox1.SelectedIndex == -1) return;
-            // Get the property name from the list item
-            string propname = listBox1.Text;
-
-            // Display the value of the selected property of the PowerStatus type.
-            Type t = typeof(System.Windows.Forms.PowerStatus);
-            PropertyInfo[] pi = t.GetProperties();
-            PropertyInfo prop = null;
-            for (int i = 0; i < pi.Length; i++)
-                if (pi[i].Name == propname)
-                {
-                    prop = pi[i];
-                    break;
-                }
-
-            object propval = prop.GetValue(SystemInformation.PowerStatus, null);
-            textBox1.Text += "\r\nThe value of the " + propname + " property is: " + propval.ToString();
         }
 
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -164,6 +144,34 @@ namespace PC_Tracking
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form1_FormClosed(null, null);
+        }
+
+        private void buttonUpdate_Click(object sender, EventArgs e)
+        {
+            webBrowser.Refresh();
+        }
+
+        private void buttonBrowser_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(webBrowser.Url.AbsoluteUri);
+        }
+
+        private void buttonLocalDB_Click(object sender, EventArgs e)
+        {
+            if (webBrowser.Visible)
+            {
+                webBrowser.Hide();
+                dataGridView.Show();
+                buttonUpdate.Enabled = false;
+                buttonLocalDB.Text = "Switch back";
+            }
+            else
+            {
+                dataGridView.Hide();
+                webBrowser.Show();
+                buttonUpdate.Enabled = true;
+                buttonLocalDB.Text = "Switch to local";
+            }
         }
     }
 }

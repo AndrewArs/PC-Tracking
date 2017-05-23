@@ -1,29 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
+using System.IO;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PC_Tracking
 {
     class Log
     {
         SQLiteConnection SQLite;
-        string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
+        const string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
+
+        public DataTable dataTable = new DataTable();
 
         public Log(String startupPath)
         {
             connectToDB(startupPath);
+            SelectFromLocal();
         }
 
         public void WriteToLog(string _operation)
         {
             WriteToDB(_operation);
+            SelectFromLocal();
             SendToWebClient(_operation);
+        }
+
+        public void SelectFromLocal()
+        {
+            string query = "SELECT Date, Operation FROM 'Log'";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+            {
+                dataTable.Clear();
+                SQLiteDataAdapter ad = new SQLiteDataAdapter(cmd);
+                ad.Fill(dataTable);
+            }
         }
 
         private void WriteToDB (string _operation)
@@ -57,9 +71,29 @@ namespace PC_Tracking
 
         private void connectToDB(String startupPath)
         {
+            if(!File.Exists(startupPath + "\\LogDB.db"))
+            {
+                SQLiteConnection.CreateFile(startupPath + "\\LogDB.db");
+
+                SQLite = new SQLiteConnection(
+                String.Format("Data Source={0};", startupPath + "\\LogDB.db"));
+
+                SQLite.Open();
+                SQLite.ChangePassword("qwerty");
+                SQLite.Close();
+            }
+            
             SQLite = new SQLiteConnection(
                 String.Format("Data Source={0};Password=qwerty", startupPath + "\\LogDB.db"));
             SQLite.Open();
+
+            string query = "CREATE TABLE IF NOT EXISTS Log ( `Date` TEXT NOT NULL , `Operation` TEXT NOT NULL" + 
+                " ,CONSTRAINT PK_log PRIMARY KEY (`Date`))";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+            {
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }
