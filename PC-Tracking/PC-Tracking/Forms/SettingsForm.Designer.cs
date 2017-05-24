@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.startupCheckBox = new System.Windows.Forms.CheckBox();
+            this.checkBoxClosing = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // startupCheckBox
@@ -43,11 +44,23 @@
             this.startupCheckBox.UseVisualStyleBackColor = true;
             this.startupCheckBox.CheckedChanged += new System.EventHandler(this.startupCheckBox_CheckedChanged);
             // 
+            // checkBoxClosing
+            // 
+            this.checkBoxClosing.AutoSize = true;
+            this.checkBoxClosing.Location = new System.Drawing.Point(12, 57);
+            this.checkBoxClosing.Name = "checkBoxClosing";
+            this.checkBoxClosing.Size = new System.Drawing.Size(114, 17);
+            this.checkBoxClosing.TabIndex = 1;
+            this.checkBoxClosing.Text = "Minimize at closing";
+            this.checkBoxClosing.UseVisualStyleBackColor = true;
+            this.checkBoxClosing.CheckedChanged += new System.EventHandler(this.checkBoxClosing_CheckedChanged);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 108);
+            this.Controls.Add(this.checkBoxClosing);
             this.Controls.Add(this.startupCheckBox);
             this.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -62,5 +75,6 @@
         #endregion
 
         private System.Windows.Forms.CheckBox startupCheckBox;
+        private System.Windows.Forms.CheckBox checkBoxClosing;
     }
 }

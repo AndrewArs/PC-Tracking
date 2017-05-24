@@ -7,6 +7,7 @@ namespace PC_Tracking
 {
     public partial class ButtonZ : System.Windows.Forms.Button
     {
+        //default values
         Color clr1;
         private Color color = Color.Teal;
         private Color m_hovercolor = Color.FromArgb(0, 0, 140);

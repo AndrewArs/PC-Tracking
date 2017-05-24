@@ -8,19 +8,33 @@ using System.Management;
 
 namespace PC_Tracking
 {
+    /// <summary>
+    /// Class for send data to local db and web server
+    /// </summary>
     class Log
     {
         SQLiteConnection SQLite;
         const string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
+        string pathToDB;
+        string hwid;
 
         public DataTable dataTable = new DataTable();
 
-        public Log(String startupPath)
+        /// <param name="startupPath">Application startup path where the local database is located</param>
+        /// <param name="_hwid">Processor id used to identify a unique user</param>
+        public Log(String startupPath, string _hwid)
         {
-            connectToDB(startupPath);
+            hwid = _hwid;
+            pathToDB = startupPath + "\\LogDB.db";
+
+            connectToDB();
             SelectFromLocal();
         }
 
+        /// <summary>
+        /// Write to local database and send to web server
+        /// </summary>
+        /// <param name="_operation"> operation that arise when power mode changed</param>
         public void WriteToLog(string _operation)
         {
             WriteToDB(_operation);
@@ -28,6 +42,9 @@ namespace PC_Tracking
             SendToWebClient(_operation);
         }
 
+        /// <summary>
+        /// Get all rows from local database
+        /// </summary>
         public void SelectFromLocal()
         {
             string query = "SELECT Date, Operation FROM 'Log'";
@@ -57,20 +74,6 @@ namespace PC_Tracking
 
         private void SendToWebClient (string _operation)
         {
-            string hwid = String.Empty;
-
-            ManagementClass mc = new ManagementClass("win32_Processor");
-            ManagementObjectCollection moc =  mc.GetInstances();
-
-            foreach(ManagementObject mo in moc)
-            {
-                if(String.IsNullOrEmpty(hwid))
-                {
-                    hwid = mo.GetPropertyValue("processorID").ToString();
-                    break;
-                }
-            }
-
             using (WebClient client = new WebClient())
             {
                 NameValueCollection postData = new NameValueCollection()
@@ -84,14 +87,17 @@ namespace PC_Tracking
             }
         }
 
-        private void connectToDB(String startupPath)
+        /// <summary>
+        /// Open connection to local database. If db not exists creates database file 
+        /// </summary>
+        private void connectToDB()
         {
-            if(!File.Exists(startupPath + "\\LogDB.db"))
+            if(!File.Exists(pathToDB))
             {
-                SQLiteConnection.CreateFile(startupPath + "\\LogDB.db");
+                SQLiteConnection.CreateFile(pathToDB);
 
                 SQLite = new SQLiteConnection(
-                String.Format("Data Source={0};", startupPath + "\\LogDB.db"));
+                String.Format("Data Source={0};", pathToDB));
 
                 SQLite.Open();
                 SQLite.ChangePassword("qwerty");
@@ -99,7 +105,7 @@ namespace PC_Tracking
             }
             
             SQLite = new SQLiteConnection(
-                String.Format("Data Source={0};Password=qwerty", startupPath + "\\LogDB.db"));
+                String.Format("Data Source={0};Password=qwerty", pathToDB));
             SQLite.Open();
 
             string query = "CREATE TABLE IF NOT EXISTS Log ( `Date` TEXT NOT NULL , `Operation` TEXT NOT NULL" + 

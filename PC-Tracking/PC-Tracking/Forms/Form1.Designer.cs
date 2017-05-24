@@ -38,12 +38,12 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.panel = new System.Windows.Forms.Panel();
+            this.buttonMinimize = new PC_Tracking.ButtonZ(this.components);
+            this.buttonClose = new PC_Tracking.ButtonZ(this.components);
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.buttonLocalDB = new PC_Tracking.ButtonZ(this.components);
             this.buttonBrowser = new PC_Tracking.ButtonZ(this.components);
             this.buttonUpdate = new PC_Tracking.ButtonZ(this.components);
-            this.buttonMinimize = new PC_Tracking.ButtonZ(this.components);
-            this.buttonClose = new PC_Tracking.ButtonZ(this.components);
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel.SuspendLayout();
@@ -122,15 +122,58 @@
             this.panel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel_MouseMove);
             this.panel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel_MouseUp);
             // 
+            // buttonMinimize
+            // 
+            this.buttonMinimize.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonMinimize.BZBackColor = System.Drawing.SystemColors.Control;
+            this.buttonMinimize.DisplayText = "_";
+            this.buttonMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonMinimize.Font = new System.Drawing.Font("Microsoft YaHei UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonMinimize.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonMinimize.Location = new System.Drawing.Point(409, 3);
+            this.buttonMinimize.MouseClickColor1 = System.Drawing.SystemColors.ControlDark;
+            this.buttonMinimize.MouseHoverColor = System.Drawing.SystemColors.ControlLight;
+            this.buttonMinimize.Name = "buttonMinimize";
+            this.buttonMinimize.Size = new System.Drawing.Size(31, 24);
+            this.buttonMinimize.TabIndex = 3;
+            this.buttonMinimize.Text = "_";
+            this.buttonMinimize.TextLocation_X = 6;
+            this.buttonMinimize.TextLocation_Y = -20;
+            this.buttonMinimize.UseVisualStyleBackColor = true;
+            this.buttonMinimize.Click += new System.EventHandler(this.buttonMinimize_Click);
+            // 
+            // buttonClose
+            // 
+            this.buttonClose.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonClose.BZBackColor = System.Drawing.SystemColors.Control;
+            this.buttonClose.DisplayText = "X";
+            this.buttonClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonClose.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonClose.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.buttonClose.Location = new System.Drawing.Point(440, 3);
+            this.buttonClose.MouseClickColor1 = System.Drawing.SystemColors.ControlDark;
+            this.buttonClose.MouseHoverColor = System.Drawing.SystemColors.ControlLight;
+            this.buttonClose.Name = "buttonClose";
+            this.buttonClose.Size = new System.Drawing.Size(31, 24);
+            this.buttonClose.TabIndex = 4;
+            this.buttonClose.Text = "X";
+            this.buttonClose.TextLocation_X = 7;
+            this.buttonClose.TextLocation_Y = 1;
+            this.buttonClose.UseVisualStyleBackColor = true;
+            this.buttonClose.Click += new System.EventHandler(this.buttonClose_Click);
+            // 
             // dataGridView
             // 
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
+            this.dataGridView.AllowUserToResizeColumns = false;
+            this.dataGridView.AllowUserToResizeRows = false;
             this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Location = new System.Drawing.Point(101, 36);
             this.dataGridView.Name = "dataGridView";
             this.dataGridView.ReadOnly = true;
+            this.dataGridView.ShowEditingIcon = false;
             this.dataGridView.Size = new System.Drawing.Size(367, 294);
             this.dataGridView.TabIndex = 9;
             this.dataGridView.Visible = false;
@@ -185,46 +228,6 @@
             this.buttonUpdate.TextLocation_Y = 0;
             this.buttonUpdate.UseVisualStyleBackColor = true;
             this.buttonUpdate.Click += new System.EventHandler(this.buttonUpdate_Click);
-            // 
-            // buttonMinimize
-            // 
-            this.buttonMinimize.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonMinimize.BZBackColor = System.Drawing.SystemColors.Control;
-            this.buttonMinimize.DisplayText = "_";
-            this.buttonMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonMinimize.Font = new System.Drawing.Font("Microsoft YaHei UI", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonMinimize.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonMinimize.Location = new System.Drawing.Point(409, 3);
-            this.buttonMinimize.MouseClickColor1 = System.Drawing.SystemColors.ControlDark;
-            this.buttonMinimize.MouseHoverColor = System.Drawing.SystemColors.ControlLight;
-            this.buttonMinimize.Name = "buttonMinimize";
-            this.buttonMinimize.Size = new System.Drawing.Size(31, 24);
-            this.buttonMinimize.TabIndex = 3;
-            this.buttonMinimize.Text = "_";
-            this.buttonMinimize.TextLocation_X = 6;
-            this.buttonMinimize.TextLocation_Y = -20;
-            this.buttonMinimize.UseVisualStyleBackColor = true;
-            this.buttonMinimize.Click += new System.EventHandler(this.buttonMinimize_Click);
-            // 
-            // buttonClose
-            // 
-            this.buttonClose.BackColor = System.Drawing.SystemColors.Control;
-            this.buttonClose.BZBackColor = System.Drawing.SystemColors.Control;
-            this.buttonClose.DisplayText = "X";
-            this.buttonClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonClose.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonClose.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.buttonClose.Location = new System.Drawing.Point(440, 3);
-            this.buttonClose.MouseClickColor1 = System.Drawing.SystemColors.ControlDark;
-            this.buttonClose.MouseHoverColor = System.Drawing.SystemColors.ControlLight;
-            this.buttonClose.Name = "buttonClose";
-            this.buttonClose.Size = new System.Drawing.Size(31, 24);
-            this.buttonClose.TabIndex = 4;
-            this.buttonClose.Text = "X";
-            this.buttonClose.TextLocation_X = 7;
-            this.buttonClose.TextLocation_Y = 1;
-            this.buttonClose.UseVisualStyleBackColor = true;
-            this.buttonClose.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // Form1
             // 

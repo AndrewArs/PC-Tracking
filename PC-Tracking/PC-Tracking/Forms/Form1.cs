@@ -7,6 +7,10 @@ namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
+        public bool minimizeOnClosing = true;
+        public string hwid = String.Empty;
+
+
         Log log;
         string powerLineStatus;
         string batteryChargeStatus;
@@ -14,16 +18,15 @@ namespace PC_Tracking
         int posX;
         int posY;
         bool drag = false;
-        string hwid = String.Empty;
 
         BindingSource bs = new BindingSource();
 
-        public Form1()
+        public Form1(string _hwid)
         {
+            hwid = _hwid;
             InitializeComponent();
-            log = new Log(Application.StartupPath);
 
-            GetHWID();
+            log = new Log(Application.StartupPath, hwid);
 
             //SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
@@ -43,21 +46,6 @@ namespace PC_Tracking
             dataGridView.DataSource = bs;
 
             log.WriteToLog("Program started");
-        }
-
-        private void GetHWID()
-        {
-            ManagementClass mc = new ManagementClass("win32_Processor");
-            ManagementObjectCollection moc = mc.GetInstances();
-
-            foreach (ManagementObject mo in moc)
-            {
-                if (String.IsNullOrEmpty(hwid))
-                {
-                    hwid = mo.GetPropertyValue("processorID").ToString();
-                    break;
-                }
-            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -118,29 +106,6 @@ namespace PC_Tracking
             WindowState = FormWindowState.Normal;
         }
 
-        private void panel_MouseUp(object sender, MouseEventArgs e)
-        {
-            drag = false;
-        }
-
-        private void panel_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (drag)
-            {
-                this.Top = System.Windows.Forms.Cursor.Position.Y - posY;
-                this.Left = System.Windows.Forms.Cursor.Position.X - posX;
-            }
-        }
-
-        private void panel_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                drag = true;
-                posX = Cursor.Position.X - this.Left;
-                posY = Cursor.Position.Y - this.Top;
-            }
-        }
 
         private void buttonMinimize_Click(object sender, EventArgs e)
         {
@@ -148,21 +113,15 @@ namespace PC_Tracking
             Hide();
         }
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void buttonClose_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Program for tracking PC's state.\nCreated by Andrew Ars\n Kharkiv 2017",
-                "About", MessageBoxButtons.OK);
-        }
-
-        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SettingsForm sf = new SettingsForm();
-            sf.ShowDialog();
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Form1_FormClosed(null, null);
+            if (minimizeOnClosing)
+            {
+                WindowState = FormWindowState.Minimized;
+                Hide();
+            }
+            else
+                Form1_FormClosed(null, null);
         }
 
         private void buttonUpdate_Click(object sender, EventArgs e)
@@ -192,5 +151,51 @@ namespace PC_Tracking
                 buttonLocalDB.Text = "Switch to local";
             }
         }
+
+        #region menu items event handlers
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Program for tracking PC's state.\nCreated by Andrew Ars\n Kharkiv 2017",
+                "About", MessageBoxButtons.OK);
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingsForm sf = new SettingsForm();
+            sf.mainForm = this;
+            sf.ShowDialog();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form1_FormClosed(null, null);
+        }
+        #endregion
+
+        #region move window functions 
+        private void panel_MouseUp(object sender, MouseEventArgs e)
+        {
+            drag = false;
+        }
+
+        private void panel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (drag)
+            {
+                this.Top = System.Windows.Forms.Cursor.Position.Y - posY;
+                this.Left = System.Windows.Forms.Cursor.Position.X - posX;
+            }
+        }
+
+        private void panel_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                drag = true;
+                posX = Cursor.Position.X - this.Left;
+                posY = Cursor.Position.Y - this.Top;
+            }
+        }
+        #endregion
     }
 }
