@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Net;
 using System.Management;
+using System.Windows;
 
 namespace PC_Tracking
 {
@@ -17,6 +18,7 @@ namespace PC_Tracking
         const string urlAddress = "https://andriiarsienov.000webhostapp.com/WriteToLog.php";
         string pathToDB;
         string hwid;
+        bool internetConn = true;
 
         public DataTable dataTable = new DataTable();
 
@@ -37,9 +39,9 @@ namespace PC_Tracking
         /// <param name="_operation"> operation that arise when power mode changed</param>
         public void WriteToLog(string _operation)
         {
+            SendToWebClient(_operation, DateTime.Now.ToString());
             WriteToDB(_operation);
             SelectFromLocal();
-            SendToWebClient(_operation);
         }
 
         /// <summary>
@@ -59,31 +61,77 @@ namespace PC_Tracking
 
         private void WriteToDB (string _operation)
         {
-            string query = "INSERT INTO Log(Date, Operation) VALUES(@date, @operation)";
+            string query = "INSERT INTO Log(Date, Operation, InternetConnection) VALUES(@date, @operation, @IC)";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
             {
                 cmd.Parameters.Add("@date", DbType.String);
                 cmd.Parameters.Add("@operation", DbType.String);
+                cmd.Parameters.Add("@IC", DbType.Boolean);
 
                 cmd.Parameters["@date"].Value = DateTime.Now.ToString();
                 cmd.Parameters["@operation"].Value = _operation;
+                cmd.Parameters["@IC"].Value = internetConn;
                 cmd.ExecuteNonQuery();
             }
         }
 
-        private void SendToWebClient (string _operation)
+        private void SendToWebClient (string _operation, string date)
         {
-            using (WebClient client = new WebClient())
+            try
             {
-                NameValueCollection postData = new NameValueCollection()
+                using (WebClient client = new WebClient())
                 {
-                    { "date", DateTime.Now.ToString() },
+                    NameValueCollection postData = new NameValueCollection()
+                {
+                    { "date", date },
                     { "operation", _operation },
                     { "hwid", hwid}
                 };
 
-                client.UploadValues(urlAddress, postData);
+                    client.UploadValues(urlAddress, postData);
+                }
+                internetConn = true;
+            }
+            catch(WebException)
+            {
+                internetConn = false;
+            }
+        }
+
+        /// <summary>
+        /// Synchronize local database with web server
+        /// </summary>
+        private void Synchronize()
+        {
+            SQLiteDataReader dr;
+            string query = "SELECT Date, Operation FROM 'Log' WHERE InternetConnection = @IC";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+            {
+                cmd.Parameters.Add("@IC", DbType.Boolean);
+
+                cmd.Parameters["@IC"].Value = false;
+
+                dr = cmd.ExecuteReader();
+            }
+
+            query = "UPDATE 'Log' SET InternetConnection = @IC WHERE Date = @date";
+
+            while (dr.Read())
+            {
+                SendToWebClient(dr["Operation"].ToString(), dr["Date"].ToString());
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+                {
+                    cmd.Parameters.Add("@IC", DbType.Boolean);
+                    cmd.Parameters.Add("@date", DbType.String);
+
+                    cmd.Parameters["@IC"].Value = true;
+                    cmd.Parameters["@date"].Value = dr["Date"].ToString();
+
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
@@ -108,13 +156,15 @@ namespace PC_Tracking
                 String.Format("Data Source={0};Password=qwerty", pathToDB));
             SQLite.Open();
 
-            string query = "CREATE TABLE IF NOT EXISTS Log ( `Date` TEXT NOT NULL , `Operation` TEXT NOT NULL" + 
-                " ,CONSTRAINT PK_log PRIMARY KEY (`Date`))";
+            string query = "CREATE TABLE IF NOT EXISTS Log ( `Date` TEXT NOT NULL , `Operation` TEXT NOT NULL" +
+                ", `InternetConnection` BOOLEAN, CONSTRAINT PK_log PRIMARY KEY (`Date`))";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
             {
                 cmd.ExecuteNonQuery();
             }
+
+            Synchronize();
         }
     }
 }
