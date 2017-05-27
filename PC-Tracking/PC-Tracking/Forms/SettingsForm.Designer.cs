@@ -49,9 +49,9 @@
             this.checkBoxClosing.AutoSize = true;
             this.checkBoxClosing.Location = new System.Drawing.Point(12, 57);
             this.checkBoxClosing.Name = "checkBoxClosing";
-            this.checkBoxClosing.Size = new System.Drawing.Size(114, 17);
+            this.checkBoxClosing.Size = new System.Drawing.Size(117, 17);
             this.checkBoxClosing.TabIndex = 1;
-            this.checkBoxClosing.Text = "Minimize at closing";
+            this.checkBoxClosing.Text = "Minimize on closing";
             this.checkBoxClosing.UseVisualStyleBackColor = true;
             this.checkBoxClosing.CheckedChanged += new System.EventHandler(this.checkBoxClosing_CheckedChanged);
             // 

@@ -6,8 +6,6 @@ namespace PC_Tracking
 {
     public partial class SettingsForm : Form
     {
-        public Form1 mainForm;
-
         public SettingsForm()
         {
             InitializeComponent();
@@ -22,7 +20,7 @@ namespace PC_Tracking
                 startupCheckBox.Checked = false;
             else startupCheckBox.Checked = true;
 
-            checkBoxClosing.Checked = mainForm.minimizeOnClosing;
+            checkBoxClosing.Checked = config.Default.MinimizeOnClosing;
         }
 
         private void startupCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -44,12 +42,14 @@ namespace PC_Tracking
         {
             if (checkBoxClosing.Checked)
             {
-                mainForm.minimizeOnClosing = true;
+                config.Default.MinimizeOnClosing = true;
             }
             else
             {
-                mainForm.minimizeOnClosing = false;
+                config.Default.MinimizeOnClosing = false;
             }
+
+            config.Default.Save();
         }
     }
 }

@@ -7,7 +7,6 @@ namespace PC_Tracking
 {
     public partial class Form1 : Form
     {
-        public bool minimizeOnClosing = true;
         public string hwid = String.Empty;
 
 
@@ -31,6 +30,7 @@ namespace PC_Tracking
             //SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+            SystemEvents.SessionEnded += SystemEvents_SessionEnded;
 
             webBrowser.Url = new Uri("https://andriiarsienov.000webhostapp.com/?hwid=" + hwid);
 
@@ -48,16 +48,16 @@ namespace PC_Tracking
             log.WriteToLog("Program started");
         }
 
+        private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
+        {
+            log.WriteToLog("Program closed");
+        }
+
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             log.WriteToLog("Program closed");
 
             Application.ExitThread();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -115,7 +115,7 @@ namespace PC_Tracking
 
         private void buttonClose_Click(object sender, EventArgs e)
         {
-            if (minimizeOnClosing)
+            if (config.Default.MinimizeOnClosing)
             {
                 WindowState = FormWindowState.Minimized;
                 Hide();
@@ -162,7 +162,6 @@ namespace PC_Tracking
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsForm sf = new SettingsForm();
-            sf.mainForm = this;
             sf.ShowDialog();
         }
 
