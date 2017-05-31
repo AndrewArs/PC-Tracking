@@ -20,7 +20,7 @@ namespace PC_Tracking
                 startupCheckBox.Checked = false;
             else startupCheckBox.Checked = true;
 
-            checkBoxClosing.Checked = config.Default.MinimizeOnClosing;
+            checkBoxClosing.Checked = Properties.Settings.Default.MinimizeOnClosing;
         }
 
         private void startupCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -42,14 +42,14 @@ namespace PC_Tracking
         {
             if (checkBoxClosing.Checked)
             {
-                config.Default.MinimizeOnClosing = true;
+                Properties.Settings.Default.MinimizeOnClosing = true;
             }
             else
             {
-                config.Default.MinimizeOnClosing = false;
+                Properties.Settings.Default.MinimizeOnClosing = false;
             }
 
-            config.Default.Save();
+            Properties.Settings.Default.Save();
         }
     }
 }

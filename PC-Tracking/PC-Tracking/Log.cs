@@ -4,8 +4,6 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Net;
-using System.Management;
-using System.Windows;
 
 namespace PC_Tracking
 {
@@ -121,16 +119,18 @@ namespace PC_Tracking
             while (dr.Read())
             {
                 SendToWebClient(dr["Operation"].ToString(), dr["Date"].ToString());
-
-                using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+                if (internetConn == true)
                 {
-                    cmd.Parameters.Add("@IC", DbType.Boolean);
-                    cmd.Parameters.Add("@date", DbType.String);
+                    using (SQLiteCommand cmd = new SQLiteCommand(query, SQLite))
+                    {
+                        cmd.Parameters.Add("@IC", DbType.Boolean);
+                        cmd.Parameters.Add("@date", DbType.String);
 
-                    cmd.Parameters["@IC"].Value = true;
-                    cmd.Parameters["@date"].Value = dr["Date"].ToString();
+                        cmd.Parameters["@IC"].Value = true;
+                        cmd.Parameters["@date"].Value = dr["Date"].ToString();
 
-                    cmd.ExecuteNonQuery();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
         }

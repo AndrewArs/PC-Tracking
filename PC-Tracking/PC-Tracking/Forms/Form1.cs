@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using System.Management;
 
 namespace PC_Tracking
 {
@@ -115,7 +114,7 @@ namespace PC_Tracking
 
         private void buttonClose_Click(object sender, EventArgs e)
         {
-            if (config.Default.MinimizeOnClosing)
+            if (Properties.Settings.Default.MinimizeOnClosing)
             {
                 WindowState = FormWindowState.Minimized;
                 Hide();
